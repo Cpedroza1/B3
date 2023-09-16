@@ -6,15 +6,97 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import collections
 
+
+def japanese_unigram_predictor(name):
+    name = name.lower()
+    prob_japanese = sum([unigram_prob[char] for char in name])
+    return 0 if prob_japanese > 0.5 else 0
+
 def russian_unigram_predictor(name):
     name = name.lower()
     prob_russian = sum([unigram_prob[char] for char in name])
     return 1 if prob_russian > 0.5 else 0
 
+def spanish_unigram_predictor(name):
+    name = name.lower()
+    prob_spanish = sum([unigram_prob[char] for char in name])
+    return 2 if prob_spanish > 0.5 else 0
+
+def italian_unigram_predictor(name):
+    name = name.lower()
+    prob_italian = sum([unigram_prob[char] for char in name])
+    return 3 if prob_italian > 0.5 else 0
+
+def chinese_unigram_predictor(name):
+    name = name.lower()
+    prob_chinese = sum([unigram_prob[char] for char in name])
+    return 4 if prob_chinese > 0.5 else 0
+
+def czech_unigram_predictor(name):
+    name = name.lower()
+    prob_czech = sum([unigram_prob[char] for char in name])
+    return 5 if prob_czech > 0.5 else 0
+
+def dutch_unigram_predictor(name):
+    name = name.lower()
+    prob_dutch = sum([unigram_prob[char] for char in name])
+    return 6 if prob_dutch > 0.5 else 0
+
+def english_unigram_predictor(name):
+    name = name.lower()
+    prob_english = sum([unigram_prob[char] for char in name])
+    return 7 if prob_english > 0.5 else 0
+
+def french_unigram_predictor(name):
+    name = name.lower()
+    prob_french = sum([unigram_prob[char] for char in name])
+    return 8 if prob_french > 0.5 else 0
+
+def german_unigram_predictor(name):
+    name = name.lower()
+    prob_german = sum([unigram_prob[char] for char in name])
+    return 9 if prob_german > 0.5 else 0
+
+def greek_unigram_predictor(name):
+    name = name.lower()
+    prob_greek = sum([unigram_prob[char] for char in name])
+    return 10 if prob_greek > 0.5 else 0
+
+def irish_unigram_predictor(name):
+    name = name.lower()
+    prob_irish = sum([unigram_prob[char] for char in name])
+    return 11 if prob_irish > 0.5 else 0
+
+def vietnamese_unigram_predictor(name):
+    name = name.lower()
+    prob_vietnamese = sum([unigram_prob[char] for char in name])
+    return 12 if prob_vietnamese > 0.5 else 0
+
+def korean_unigram_predictor(name):
+    name = name.lower()
+    prob_korean = sum([unigram_prob[char] for char in name])
+    return 13 if prob_korean > 0.5 else 0
+
+def portugese_unigram_predictor(name):
+    name = name.lower()
+    prob_portugese = sum([unigram_prob[char] for char in name])
+    return 14 if prob_portugese > 0.5 else 0
+
+def polish_unigram_predictor(name):
+    name = name.lower()
+    prob_polish = sum([unigram_prob[char] for char in name])
+    return 15 if prob_polish > 0.5 else 0
+
+def arabic_unigram_predictor(name):
+    name = name.lower()
+    prob_arabic = sum([unigram_prob[char] for char in name])
+    return 1 if prob_arabic > 0.5 else 0 
+
 
 def combine_pred(unigram_probs, model_probs, weight):
     combined_probs = (1 - weight) * unigram_probs + weight * model_probs
     return combined_probs.argmax()
+
 
     
 
@@ -25,23 +107,23 @@ if __name__ == "__main__":
     new_set = pd.DataFrame
 
     #Dictionary of nationalities associated with a label(number)
-    possibilities = {"Japanese": 0,
-                     "Russian": 1,
-                     "Spanish": 2,
-                     "Italian": 3,
-                     "Chinese": 4,
-                     "Czech": 5, 
-                     "Dutch": 6,
-                     "English": 7,
-                     "French": 8,
-                     "German": 9,
-                     "Greek": 10,
-                     "Irish":11,
-                     "Vietnamese":12,
-                     "Korean":13,
-                     "Portugese":14,
-                     "Polish":15,
-                     "Arabic":16,}
+    possibilities = {'Japanese': 0,
+                     'Russian': 1,
+                     'Spanish': 2,
+                     'Italian': 3,
+                     'Chinese': 4,
+                     'Czech': 5, 
+                     'Dutch': 6,
+                     'English': 7,
+                     'French': 8,
+                     'German': 9,
+                     'Greek': 10,
+                     'Irish':11,
+                     'Vietnamese':12,
+                     'Korean':13,
+                     'Portugese':14,
+                     'Polish':15,
+                     'Arabic':16,}
     #reads csv
     names = pd.read_csv('surnames-test.csv')
 
@@ -49,34 +131,20 @@ if __name__ == "__main__":
     names['Name'] = names['Name'].str.lower()
 
     #makes data frame for language column
-    names['Language'] = names['Language'].apply(lambda x: possibilities[x] if x in possibilities else 17)
-    
+    names['Language'] = names['Language'].map(possibilities)
 
     #splits data into 2 sets, training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(names['Name'], names['Language'], test_size=.2, random_state=42)
 
-    vectorizer = TfidfVectorizer(analyzer='char', ngram_range=(1,2))
-    X = vectorizer.fit_transform(names['Name'])
-    vectorizer.get_feature_names_out
+
+    vectorizer = TfidfVectorizer(analyzer='char', ngram_range=(1,1))
+    train_features = vectorizer.fit_transform(X_train)
+    test_features = vectorizer.fit_transform(X_test)
+
+    model.fit(train_features, names['Language'])
     
-    model.fit(X, names['Language'])
+    model_pred = model.predict(test_features)
 
-    features = vectorizer.transform(X_train)
-
-    new_set['Language'] = model.predict(features)
-
-    new_set = new_set['Name'] = X_test
-    
-    print(new_set['Name'] + new_set['Language'] + "\n")
-
-
-    # y_pred = model.predict(X_test)
-
-    # threshold = 0.5 
-    # predicted = [1 if pred > threshold else 0 for pred in y_pred]
-
-    # weights = model.coef_
-    # print("coefficients: /n", weights)
     
 
     # #gets count of unique char occurences
