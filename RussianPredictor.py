@@ -20,6 +20,10 @@ def combine_pred(unigram_probs, model_probs, weight):
 
 if __name__ == "__main__":
 
+    #Linear Regression model and DataFrame for results of test.
+    model = LinearRegression()
+    new_set = pd.DataFrame
+
     #Dictionary of nationalities associated with a label(number)
     possibilities = {"Japanese": 0,
                      "Russian": 1,
@@ -40,8 +44,10 @@ if __name__ == "__main__":
                      "Arabic":16,}
     #reads csv
     names = pd.read_csv('surnames-test.csv')
+
     #makes data frame for names column
     names['Name'] = names['Name'].str.lower()
+
     #makes data frame for language column
     names['Language'] = names['Language'].apply(lambda x: possibilities[x] if x in possibilities else 17)
     
@@ -50,17 +56,18 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = train_test_split(names['Name'], names['Language'], test_size=.2, random_state=42)
 
     vectorizer = TfidfVectorizer(analyzer='char', ngram_range=(1,2))
-
     X = vectorizer.fit_transform(names['Name'])
-
+    vectorizer.get_feature_names_out
     
-    model = LinearRegression()
     model.fit(X, names['Language'])
 
-    features= vectorizer.transform(X_train)
-    predictions = model.predict(features)
+    features = vectorizer.transform(X_train)
 
-    print(X_train)
+    new_set['Language'] = model.predict(features)
+
+    new_set = new_set['Name'] = X_test
+    
+    print(new_set['Name'] + new_set['Language'] + "\n")
 
 
     # y_pred = model.predict(X_test)
