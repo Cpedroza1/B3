@@ -2,6 +2,7 @@ import sys
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import collections
 
@@ -10,61 +11,65 @@ def russian_unigram_predictor(name):
     prob_russian = sum([unigram_prob[char] for char in name])
     return 1 if prob_russian > 0.5 else 0
 
-def learn_language(language):
-    if language == "Japanese":
-        return 0
-    elif language == "Russian":
-        return 1
-    # elif language == "Spanish":
-    #     return 2
-    # elif language == "Italian":
-    #     return 3
-    # elif language == "Chinese":
-    #     return 4
-    # elif language == "Czech":
-    #     return 5
-    # elif language == "Dutch":
-    #     return 6
-    # elif language == "English":
-    #     return 7
-    # elif language == "French":
-    #     return 8
-    # elif language == "German":
-    #     return 9
-    # elif language == "Greek":
-    #     return 10
-    # elif language == "Irish":
-    #     return 11
-    # elif language == "Vietnamese":
-    #     return 12
-    # elif language == "Korean":
-    #     return 13
-    # elif language == "Portugese":
-    #     return 14
-    # elif language == "Polish":
-    #     return 15
-    # elif language == "Arabic":
-    #     return 16
+
+def combine_pred(unigram_probs, model_probs, weight):
+    combined_probs = (1 - weight) * unigram_probs + weight * model_probs
+    return combined_probs.argmax()
+
     
 
 if __name__ == "__main__":
 
+    #Dictionary of nationalities associated with a label(number)
+    possibilities = {"Japanese": 0,
+                     "Russian": 1,
+                     "Spanish": 2,
+                     "Italian": 3,
+                     "Chinese": 4,
+                     "Czech": 5, 
+                     "Dutch": 6,
+                     "English": 7,
+                     "French": 8,
+                     "German": 9,
+                     "Greek": 10,
+                     "Irish":11,
+                     "Vietnamese":12,
+                     "Korean":13,
+                     "Portugese":14,
+                     "Polish":15,
+                     "Arabic":16,}
     #reads csv
     names = pd.read_csv('surnames-test.csv')
     #makes data frame for names column
     names['Name'] = names['Name'].str.lower()
     #makes data frame for language column
-    names['Language'] = names['Language'].apply(lambda lang: 1 if lang == "Russian" else 0)
+    names['Language'] = names['Language'].apply(lambda x: possibilities[x] if x in possibilities else 17)
+    
 
     #splits data into 2 sets, training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(names['Name'], names['Language'], test_size=.2, random_state=42)
 
-    model = LinearRegression()
-    model.fit(X_train, y_train)
+    vectorizer = TfidfVectorizer(analyzer='char', ngram_range=(1,2))
 
-    y_pred = model.predict(X_test)
-    weights = model.coef_
-    print("coefficients: /n", weights)
+    X = vectorizer.fit_transform(names['Name'])
+
+    
+    model = LinearRegression()
+    model.fit(X, names['Language'])
+
+    features= vectorizer.transform(X_train)
+    predictions = model.predict(features)
+
+    print(X_train)
+
+
+    # y_pred = model.predict(X_test)
+
+    # threshold = 0.5 
+    # predicted = [1 if pred > threshold else 0 for pred in y_pred]
+
+    # weights = model.coef_
+    # print("coefficients: /n", weights)
     
 
     # #gets count of unique char occurences
