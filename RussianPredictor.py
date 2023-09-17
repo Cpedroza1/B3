@@ -8,95 +8,10 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 import collections
 
 
-def japanese_unigram_predictor(name):
-    name = name.lower()
-    prob_japanese = sum([unigram_prob[char] for char in name])
-    return 0 if prob_japanese > 0.5 else 0
-
-def russian_unigram_predictor(name):
-    name = name.lower()
-    prob_russian = sum([unigram_prob[char] for char in name])
-    return 1 if prob_russian > 0.5 else 0
-
-def spanish_unigram_predictor(name):
-    name = name.lower()
-    prob_spanish = sum([unigram_prob[char] for char in name])
-    return 2 if prob_spanish > 0.5 else 0
-
-def italian_unigram_predictor(name):
-    name = name.lower()
-    prob_italian = sum([unigram_prob[char] for char in name])
-    return 3 if prob_italian > 0.5 else 0
-
-def chinese_unigram_predictor(name):
-    name = name.lower()
-    prob_chinese = sum([unigram_prob[char] for char in name])
-    return 4 if prob_chinese > 0.5 else 0
-
-def czech_unigram_predictor(name):
-    name = name.lower()
-    prob_czech = sum([unigram_prob[char] for char in name])
-    return 5 if prob_czech > 0.5 else 0
-
-def dutch_unigram_predictor(name):
-    name = name.lower()
-    prob_dutch = sum([unigram_prob[char] for char in name])
-    return 6 if prob_dutch > 0.5 else 0
-
-def english_unigram_predictor(name):
-    name = name.lower()
-    prob_english = sum([unigram_prob[char] for char in name])
-    return 7 if prob_english > 0.5 else 0
-
-def french_unigram_predictor(name):
-    name = name.lower()
-    prob_french = sum([unigram_prob[char] for char in name])
-    return 8 if prob_french > 0.5 else 0
-
-def german_unigram_predictor(name):
-    name = name.lower()
-    prob_german = sum([unigram_prob[char] for char in name])
-    return 9 if prob_german > 0.5 else 0
-
-def greek_unigram_predictor(name):
-    name = name.lower()
-    prob_greek = sum([unigram_prob[char] for char in name])
-    return 10 if prob_greek > 0.5 else 0
-
-def irish_unigram_predictor(name):
-    name = name.lower()
-    prob_irish = sum([unigram_prob[char] for char in name])
-    return 11 if prob_irish > 0.5 else 0
-
-def vietnamese_unigram_predictor(name):
-    name = name.lower()
-    prob_vietnamese = sum([unigram_prob[char] for char in name])
-    return 12 if prob_vietnamese > 0.5 else 0
-
-def korean_unigram_predictor(name):
-    name = name.lower()
-    prob_korean = sum([unigram_prob[char] for char in name])
-    return 13 if prob_korean > 0.5 else 0
-
-def portugese_unigram_predictor(name):
-    name = name.lower()
-    prob_portugese = sum([unigram_prob[char] for char in name])
-    return 14 if prob_portugese > 0.5 else 0
-
-def polish_unigram_predictor(name):
-    name = name.lower()
-    prob_polish = sum([unigram_prob[char] for char in name])
-    return 15 if prob_polish > 0.5 else 0
-
-def arabic_unigram_predictor(name):
-    name = name.lower()
-    prob_arabic = sum([unigram_prob[char] for char in name])
-    return 1 if prob_arabic > 0.5 else 0 
-
 
 def combine_pred(unigram_probs, model_probs, weight):
     combined_probs = (1 - weight) * unigram_probs + weight * model_probs
-    return combined_probs.argmax()
+    return combined_probs
 
 
     
@@ -122,52 +37,82 @@ if __name__ == "__main__":
                      'Irish':12,
                      'Vietnamese':13,
                      'Korean':14,
-                     'Portugese':15,
+                     'Portuguese':15,
                      'Polish':16,
                      'Arabic':17,
                      'Scottish': 18}
-    #reads csv
-    names = pd.read_csv('surnames-test.csv')
-    results = pd.read_csv('surnames-result.csv')
+    # reads csv
+    names = pd.read_csv('surnames-test.csv', encoding='utf-8')
+    results = pd.read_csv('surnames-result.csv', encoding='utf-8')
 
-    #makes data frame for names column
+    #  makes data frame for names column
     names['Name'] = names['Name'].str.lower()
 
-    #makes data frame for language column
+    # makes data frame for language column
     names['Language'] = names['Language'].map(possibilities)
 
-    #splits data into 2 sets, training and testing sets, set test size to 20% of data and 80% is training set
-    X_train, X_test, y_train, y_test = train_test_split(names['Name'], names['Language'], test_size=.2, random_state=42)
-    print(y_train.isna)
-    print(y_test.isna)
-
+    # splits data into 2 sets, training and testing sets, set test size to 20% of data and 80% is training set
+    X_train, X_test, y_train, y_test = train_test_split(names['Name'], names['Language'], test_size=.2, random_state=12)
 
     # attempting to extract features using unigram (range (1,1))
-    vectorizer = TfidfVectorizer(analyzer='char', ngram_range=(1,1))
+    vectorizer = TfidfVectorizer(analyzer='char', ngram_range=(1,2))
     train_features = vectorizer.fit_transform(X_train)
     test_features = vectorizer.transform(X_test)
 
     
-    #fitting linear regression model with features vector and language training set
+    # fitting linear regression model with features vector and language training set
     model.fit(train_features, y_train)
-    model_pred = (model.predict(test_features > 0.5).astype(int))
+    model_pred = model.predict(test_features > 0.5).astype(int)
 
-    # #gets count of unique char occurences
-    # char_counts = collections.Counter("".join(X_train))
-    # #gets total chars used in data
-    # total_chars = sum(char_counts.values())
-    # #probability of char occuring.  (count of char in question)/(total chars in data)
-    # unigram_prob = {char: count / total_chars for char, count in char_counts.items()}
+    # want to make a dictionary that will assign a list of char probabilities from vectorizer and assigns to nationality number as key -> name_unigram_models[2] = char probs for russian labeled data
+    name_unigram_models = {}
 
+    for x in range(18):
+        lang_num = names[names['Language'] == x]
+        char_counts = collections.Counter("".join(lang_num['Name']))
+        total_chars = sum(char_counts.values())
+        unigram_probs = {char: count / total_chars for char, count in char_counts.items()}
+        
+        name_unigram_models[x] = unigram_probs
 
-    results = pd.DataFrame({'Name': X_test, 'Prediction': model_pred})
+    # will be able to take name, find sum of character prob, and combine with model predictions to find best possible choice
+    unigram_pred = []
+
+    for name in X_test:
+        choices = []
+
+        for x in range(18):
+            unigram_probs = []
+            unigram_probs = name_unigram_models[x]
+
+            for char in name:
+                if char not in name_unigram_models[x]:
+                    unigram_probs[char] = 0.0
+            
+            possible_nationality = sum([unigram_probs[char] for char in name])
+            
+            choices.append(possible_nationality)
+
+        
+        predicted_nationality = choices.index(max(choices))
+        
+        unigram_pred.append(predicted_nationality)
+        
+        # combine predictions  
+        final_predictions = [combine_pred(unigram_pred, model_pred, weight=0.5) for unigram_pred, model_pred in zip(unigram_pred, model_pred)]
+        final_predictions = np.round(final_predictions).astype(int)
+        final_predictions = np.abs(final_predictions)
+    
+    # writing results to csv
+    results = pd.DataFrame({'Name': X_test, 'Prediction': final_predictions})
     results.to_csv('surnames-result.csv', index=False)
 
-    accuracy = accuracy_score(y_test, model_pred)
+    # prints accuracy score using the test data and model predictions.
+    accuracy = accuracy_score(y_test, final_predictions)
     print(f"Accuracy: {accuracy}")
 
-    print(classification_report(y_test, model_pred))
-    # print(confusion_matrix(y_test, model_pred))
+    # prints classification report that shows my test data and the predictions made by the linear regression model.
+    print(classification_report(y_test, final_predictions))
 
     weight = model.coef_
     print("Learned weights:", weight)
