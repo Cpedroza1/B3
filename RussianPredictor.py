@@ -162,7 +162,6 @@ if __name__ == "__main__":
     unigram_prob = {char: count / total_chars for char, count in char_counts.items()}
 
 
-
     results = pd.DataFrame({'Name': X_test, 'Prediction': model_pred})
     results.to_csv('surnames-result.csv', index=False)
 
