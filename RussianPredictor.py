@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score, classification_report, f1_score
 import collections
 
 
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = train_test_split(names['Name'], names['Language'], test_size=.2, random_state=12)
 
     # attempting to extract features using unigram (range (1,1))
-    vectorizer = TfidfVectorizer(analyzer='char', ngram_range=(1,2))
+    vectorizer = TfidfVectorizer(analyzer='char', ngram_range=(1,1))
     train_features = vectorizer.fit_transform(X_train)
     test_features = vectorizer.transform(X_test)
 
@@ -114,8 +114,12 @@ if __name__ == "__main__":
     # prints classification report that shows my test data and the predictions made by the linear regression model.
     print(classification_report(y_test, final_predictions))
 
+
+    # checking weights learned and f1_score but i am getting alot of negatives
     weight = model.coef_
     print("Learned weights:", weight)
+    f1 = f1_score(y_test, final_predictions, average='weighted')
+    print(f1)
 
    
 
