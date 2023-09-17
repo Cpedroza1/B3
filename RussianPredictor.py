@@ -75,34 +75,61 @@ if __name__ == "__main__":
         
         name_unigram_models[x] = unigram_probs
 
+#### this is commented out since this is to test all languages.  made another to only test russian names
     # will be able to take name, find sum of character prob, and combine with model predictions to find best possible choice
+    # unigram_pred = []
+
+    # for name in X_test:
+    #     choices = []
+
+    #     for x in range(18):
+    #         unigram_probs = []
+    #         unigram_probs = name_unigram_models[x]
+
+    #         for char in name:
+    #             if char not in name_unigram_models[x]:
+    #                 unigram_probs[char] = 0.0
+            
+    #         possible_nationality = sum([unigram_probs[char] for char in name])
+            
+    #         choices.append(possible_nationality)
+
+        
+    #     predicted_nationality = choices.index(max(choices))
+        
+    #     unigram_pred.append(predicted_nationality)
+        
+    #     # combine predictions  
+    #     final_predictions = [combine_pred(unigram_pred, model_pred, weight=0.5) for unigram_pred, model_pred in zip(unigram_pred, model_pred)]
+    #     final_predictions = np.round(final_predictions).astype(int)
+    #     final_predictions = np.abs(final_predictions)
+
+
+#### this is to predict only using the probability of russian names with the russian character set
     unigram_pred = []
+    russian_unigram_probs = []
 
     for name in X_test:
         choices = []
 
-        for x in range(18):
-            unigram_probs = []
-            unigram_probs = name_unigram_models[x]
+        # gets dictionary of (char: probability for russian names).  any missing character is set to 0
+        russian_unigram_probs = name_unigram_models[2]
+        for char in name:
+            if char not in name_unigram_models[2]:
+                russian_unigram_probs[char] = 0.0
+        # gets total probability for characters in name
+        total_name_char_prob = sum([russian_unigram_probs[char] for char in name])
 
-            for char in name:
-                if char not in name_unigram_models[x]:
-                    unigram_probs[char] = 0.0
-            
-            possible_nationality = sum([unigram_probs[char] for char in name])
-            
-            choices.append(possible_nationality)
+        # if name probability is above or equal to threshold it w
+        if total_name_char_prob >= 0.5:
+            unigram_pred.append(2)
+        else:
+            unigram_pred.append(0)
 
-        
-        predicted_nationality = choices.index(max(choices))
-        
-        unigram_pred.append(predicted_nationality)
-        
-        # combine predictions  
-        final_predictions = [combine_pred(unigram_pred, model_pred, weight=0.5) for unigram_pred, model_pred in zip(unigram_pred, model_pred)]
-        final_predictions = np.round(final_predictions).astype(int)
-        final_predictions = np.abs(final_predictions)
-    
+        # Combine predictions
+        final_predictions = unigram_pred
+
+
     # writing results to csv
     results = pd.DataFrame({'Name': X_test, 'Prediction': final_predictions})
     results.to_csv('surnames-result.csv', index=False)
