@@ -1,5 +1,6 @@
 import sys
 import pandas as pd
+import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -107,25 +108,26 @@ if __name__ == "__main__":
     new_set = pd.DataFrame
 
     #Dictionary of nationalities associated with a label(number)
-    possibilities = {'Japanese': 0,
-                     'Russian': 1,
-                     'Spanish': 2,
-                     'Italian': 3,
-                     'Chinese': 4,
-                     'Czech': 5, 
-                     'Dutch': 6,
-                     'English': 7,
-                     'French': 8,
-                     'German': 9,
-                     'Greek': 10,
-                     'Irish':11,
-                     'Vietnamese':12,
-                     'Korean':13,
-                     'Portugese':14,
-                     'Polish':15,
-                     'Arabic':16,}
+    possibilities = {'Japanese': 1,
+                     'Russian': 2,
+                     'Spanish': 3,
+                     'Italian': 4,
+                     'Chinese': 5,
+                     'Czech': 6, 
+                     'Dutch': 7,
+                     'English': 8,
+                     'French': 9,
+                     'German': 10,
+                     'Greek': 11,
+                     'Irish':12,
+                     'Vietnamese':13,
+                     'Korean':14,
+                     'Portugese':15,
+                     'Polish':16,
+                     'Arabic':17,}
     #reads csv
     names = pd.read_csv('surnames-test.csv')
+    results = pd.read_csv('surnames-result.csv')
 
     #makes data frame for names column
     names['Name'] = names['Name'].str.lower()
@@ -136,40 +138,39 @@ if __name__ == "__main__":
     #splits data into 2 sets, training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(names['Name'], names['Language'], test_size=.2, random_state=42)
 
-
+    # attempting to extract features using unigram (range (1,1))
     vectorizer = TfidfVectorizer(analyzer='char', ngram_range=(1,1))
     train_features = vectorizer.fit_transform(X_train)
-    test_features = vectorizer.fit_transform(X_test)
+    test_features = vectorizer.transform(X_test)
 
-    model.fit(train_features, names['Language'])
+    y_train = np.nan_to_num(y_train)
+    y_test = np.nan_to_num(y_test)
+    X_train = np.nan_to_num(X_train)
+    X_test = np.nan_to_num(X_test)
+
+    model.fit(train_features, y_train)
     
-    model_pred = model.predict(test_features)
+    model_pred = (model.predict(test_features > 0.4).astype(int))
+
+    #gets count of unique char occurences
+    char_counts = collections.Counter("".join(X_train))
+    #gets total chars used in data
+    total_chars = sum(char_counts.values())
+    #probability of char occuring.  (count of char in question)/(total chars in data)
+    unigram_prob = {char: count / total_chars for char, count in char_counts.items()}
 
     
 
-    # #gets count of unique char occurences
-    # char_counts = collections.Counter("".join(X_train))
-    
-    # #gets total chars used in data
-    # total_chars = sum(char_counts.values())
+    results = pd.DataFrame({'Name': X_test, 'Prediction': model_pred})
+    results.to_csv('surnames-result.csv', index=False)
 
-    # #probability of char occuring.  (count of char in question)/(total chars in data)
-    # unigram_prob = {char: count / total_chars for char, count in char_counts.items()}
-    
-    # y_pred = [russian_unigram_predictor(name) for name in X_test]
-    
-
-    # names.to_csv('surnames-result.csv')
-
-    # accuracy = accuracy_score(y_test, y_pred)
+    # accuracy = accuracy_score(y_test, model_pred)
     # print(f"Accuracy: {accuracy}")
 
-    # print(classification_report(y_test, y_pred))
-    # print(confusion_matrix(y_test, y_pred))
+    # print(classification_report(y_test, model_pred))
+    # print(confusion_matrix(y_test, model_pred))
 
-    # for name in X_test:
-    #     names['Name'] = name
-    #     names['Language'] = y_pred
+   
 
 
 
