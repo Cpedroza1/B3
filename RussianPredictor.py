@@ -55,7 +55,7 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = train_test_split(names['Name'], names['Language'], test_size=.2, random_state=12)
 
     # attempting to extract features using unigram (range (1,1))
-    vectorizer = TfidfVectorizer(analyzer='char', ngram_range=(1,1))
+    vectorizer = TfidfVectorizer(analyzer='char', ngram_range=(2,2))
     train_features = vectorizer.fit_transform(X_train)
     test_features = vectorizer.transform(X_test)
 
@@ -76,6 +76,7 @@ if __name__ == "__main__":
         name_unigram_models[x] = unigram_probs
 
 #### this is commented out since this is to test all languages.  made another to only test russian names
+
     # will be able to take name, find sum of character prob, and combine with model predictions to find best possible choice
     # unigram_pred = []
 
@@ -106,8 +107,10 @@ if __name__ == "__main__":
 
 
 #### this is to predict only using the probability of russian names with the russian character set
+
     unigram_pred = []
     russian_unigram_probs = []
+    english_unigram_probs = []
 
     for name in X_test:
         choices = []
@@ -117,11 +120,12 @@ if __name__ == "__main__":
         for char in name:
             if char not in name_unigram_models[2]:
                 russian_unigram_probs[char] = 0.0
+
         # gets total probability for characters in name
         total_name_char_prob = sum([russian_unigram_probs[char] for char in name])
 
         # if name probability is above or equal to threshold it w
-        if total_name_char_prob >= 0.5:
+        if total_name_char_prob >= 0.4:
             unigram_pred.append(2)
         else:
             unigram_pred.append(0)
@@ -129,6 +133,7 @@ if __name__ == "__main__":
         # Combine predictions
         final_predictions = unigram_pred
 
+#### this is to print reports of accuracy and so on 
 
     # writing results to csv
     results = pd.DataFrame({'Name': X_test, 'Prediction': final_predictions})
@@ -147,6 +152,30 @@ if __name__ == "__main__":
     print("Learned weights:", weight)
     f1 = f1_score(y_test, final_predictions, average='weighted')
     print(f1)
+
+#### printing bigrams for english names and their probabilities 
+
+    target = 2  # change this value to choose which language you want to filter bigrams for
+
+    mask = np.array(y_train) == target
+    bigram_sums = train_features[mask].sum(axis=0)
+
+    # gets the list of bigrams associated with the target label
+    bigrams_list = vectorizer.get_feature_names_out()
+
+    # dictionary for bigram probs
+    bigram_probabilities = {}
+
+    # go through bigrams and probs
+    for i in range(len(bigrams_list)):
+        bigram = bigrams_list[i]
+        bigram_sum = bigram_sums[0, i]
+        if bigram_sum > 0:
+            bigram_probabilities[bigram] = bigram_sum
+
+    # print the bigrams and the probability 
+    for bigram, probability in bigram_probabilities.items():
+        print(f"Bigram: {bigram}, Probability: {probability}")
 
    
 
