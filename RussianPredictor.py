@@ -54,7 +54,7 @@ if __name__ == "__main__":
     # splits data into 2 sets, training and testing sets, set test size to 20% of data and 80% is training set
     X_train, X_test, y_train, y_test = train_test_split(names['Name'], names['Language'], test_size=.2, random_state=12)
 
-    # attempting to extract features using unigram (range (1,1))
+    # attempting to extract features using unigram (range (1,1) or bigram range (2,2))
     vectorizer = TfidfVectorizer(analyzer='char', ngram_range=(2,2))
     train_features = vectorizer.fit_transform(X_train)
     test_features = vectorizer.transform(X_test)
@@ -155,7 +155,7 @@ if __name__ == "__main__":
 
 #### printing bigrams for english names and their probabilities 
 
-    target = 2  # change this value to choose which language you want to filter bigrams for
+    target = 8  # change this value to choose which language you want to filter bigrams for
 
     mask = np.array(y_train) == target
     bigram_sums = train_features[mask].sum(axis=0)
