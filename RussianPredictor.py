@@ -124,7 +124,8 @@ if __name__ == "__main__":
                      'Korean':14,
                      'Portugese':15,
                      'Polish':16,
-                     'Arabic':17,}
+                     'Arabic':17,
+                     'Unknown': 0}
     #reads csv
     names = pd.read_csv('surnames-test.csv')
     results = pd.read_csv('surnames-result.csv')
@@ -143,14 +144,15 @@ if __name__ == "__main__":
     train_features = vectorizer.fit_transform(X_train)
     test_features = vectorizer.transform(X_test)
 
-    y_train = np.nan_to_num(y_train)
-    y_test = np.nan_to_num(y_test)
-    X_train = np.nan_to_num(X_train)
-    X_test = np.nan_to_num(X_test)
+    #had to do this to stop NaN error
+    y_train = np.nan_to_num(y_train, nan=0, posinf=0, neginf=0)
+    y_test = np.nan_to_num(y_test, nan=0, posinf=0, neginf=0)
+    X_train = np.nan_to_num(X_train, nan=0, posinf=0, neginf=0)
+    X_test = np.nan_to_num(X_test, nan=0, posinf=0, neginf=0)
 
+    #fitting linear regression model with features vector and language training set
     model.fit(train_features, y_train)
-    
-    model_pred = (model.predict(test_features > 0.4).astype(int))
+    model_pred = (model.predict(test_features > 0.5).astype(int))
 
     #gets count of unique char occurences
     char_counts = collections.Counter("".join(X_train))
@@ -159,7 +161,7 @@ if __name__ == "__main__":
     #probability of char occuring.  (count of char in question)/(total chars in data)
     unigram_prob = {char: count / total_chars for char, count in char_counts.items()}
 
-    
+
 
     results = pd.DataFrame({'Name': X_test, 'Prediction': model_pred})
     results.to_csv('surnames-result.csv', index=False)
@@ -169,6 +171,9 @@ if __name__ == "__main__":
 
     # print(classification_report(y_test, model_pred))
     # print(confusion_matrix(y_test, model_pred))
+
+    weight = model.coef_
+    print("Learned weights:", weight)
 
    
 
