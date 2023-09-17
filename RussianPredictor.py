@@ -165,10 +165,10 @@ if __name__ == "__main__":
     results = pd.DataFrame({'Name': X_test, 'Prediction': model_pred})
     results.to_csv('surnames-result.csv', index=False)
 
-    # accuracy = accuracy_score(y_test, model_pred)
-    # print(f"Accuracy: {accuracy}")
+    accuracy = accuracy_score(y_test, model_pred)
+    print(f"Accuracy: {accuracy}")
 
-    # print(classification_report(y_test, model_pred))
+    print(classification_report(y_test, model_pred))
     # print(confusion_matrix(y_test, model_pred))
 
     weight = model.coef_
